@@ -2,3 +2,5 @@
 
 settings/*.toml
 !settings/*.example.toml
+
+/gateway/node_modules

@@ -1,4 +1,5 @@
 import os from 'os';
+import si from 'systeminformation';
 
 class SystemMonitor {
     constructor() {
@@ -7,7 +8,6 @@ class SystemMonitor {
             timestamp: Date.now()
         };
         
-        this.specs = this.getSpecs();
         this.init=true;
     }
 
@@ -26,8 +26,18 @@ class SystemMonitor {
         return { totalIdle, totalTick };
     }
 
-    getSpecs() {
+    async getSpecs() {
         const cpus = os.cpus();
+
+        const disks = await si.diskLayout();
+        
+        const diskInfo = await disks.reduce((acc, disk) => {
+            acc[disk.device] = {
+                type: disk.type,
+                size: (disk.size / 1024 / 1024 / 1024).toFixed(2) + ' GB'
+            };
+            return acc;
+        }, {});
         
         return {
             hostname: os.hostname(),
@@ -42,6 +52,8 @@ class SystemMonitor {
             },
             
             totalRam: (os.totalmem() / 1024 / 1024 / 1024).toFixed(2) + ' GB',
+
+            disks: diskInfo,
             
             initDate: new Date().toISOString()
         };
@@ -94,7 +106,7 @@ class SystemMonitor {
         };
     }
 
-    getInfo() {
+    async getInfo() {
         const ram = this.getActualRAM();
         const cpu = this.getActualCPU();
         
@@ -110,7 +122,7 @@ class SystemMonitor {
             uptime: os.uptime()
         };
         if(this.init){
-            metrics.specs = this.specs;
+            metrics.specs = await this.getSpecs();
             this.init=false;
         }
         

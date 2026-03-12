@@ -11,6 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "systeminformation": "^5.31.4"
+  }
 }
