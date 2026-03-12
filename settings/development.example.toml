@@ -1,0 +1,22 @@
+debug = true
+
+[server]
+host = "127.0.0.1"
+port = 8080
+protocol = "http"
+
+[balancer]
+ram-weight = 2.0
+cpu-weight = 1.0
+
+[[gateways]]
+name = "gateway-1"
+host = "127.0.0.1"
+port = 8081
+protocol = "http"
+
+[[gateways]]
+name = "gateway-2"
+host = "127.0.0.1"
+port = 8082
+protocol = "http"
