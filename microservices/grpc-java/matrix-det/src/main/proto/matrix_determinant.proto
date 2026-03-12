@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.matrix.det.grpc";
+
+package matrix;
+
+service MatrixDeterminantService {
+  rpc CalculateDeterminant (MatrixRequest) returns (DeterminantResponse);
+}
+
+message MatrixRequest {
+  int32 rows = 1;
+  int32 cols = 2;
+}
+
+message DeterminantResponse {
+  double determinant = 1;
+}

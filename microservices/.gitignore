@@ -1,0 +1,43 @@
+# === General ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# === Java (grpc-java) ===
+grpc-java/**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# === Node.js (minirsi-node, mqtt-node-ts) ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === TypeScript (mqtt-node-ts) ===
+mqtt-node-ts/dist/
+
+# === Python (msgpack-python) ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+.eggs/
+
+# === Variables de entorno ===
+.env
+.env.local
+.env.*.local

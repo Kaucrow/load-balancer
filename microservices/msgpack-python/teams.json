@@ -1,0 +1,26 @@
+[
+  {
+    "clubName": "Celtic FC",
+    "foundedYear": 1888,
+    "championsCount": 1,
+    "leagueTitlesCount": 54,
+    "squadValue": 195.00,
+    "stadiumName": "Celtic Park"
+  },
+  {
+    "clubName": "Olympique de Marseille",
+    "foundedYear": 1899,
+    "championsCount": 1,
+    "leagueTitlesCount": 9,
+    "squadValue": 310.00,
+    "stadiumName": "Stade Vélodrome"
+  },
+  {
+    "clubName": "Bayer Leverkusen",
+    "foundedYear": 1904,
+    "championsCount": 0,
+    "leagueTitlesCount": 1,
+    "squadValue": 622.00,
+    "stadiumName": "BayArena"
+  }
+]
