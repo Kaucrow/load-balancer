@@ -33,29 +33,30 @@ class SystemMonitor {
         
         const diskInfo = await disks.reduce((acc, disk) => {
             acc[disk.device] = {
-                type: disk.type,
-                size: (disk.size / 1024 / 1024 / 1024).toFixed(2) + ' GB'
+                diskType: disk.type,
+                diskSize: (disk.size), /// 1024 / 1024 / 1024),//.toFixed(2) + ' GB',
+                diskSpeed: disk.bytesPerSector// + ' RPM'
             };
             return acc;
         }, {});
         
         return {
-            hostname: os.hostname(),
-            platform: os.platform(),
-            arch: process.arch,
+            //hostname: os.hostname(),
+            //platform: os.platform(),
+            //arch: process.arch,
             
             cpu: {
-                model: cpus[0].model,
-                logicalCores: cpus.length,
-                maxSpeed: cpus[0].speed + ' MHz',
-                theoricScore: this.getTheoricScore(cpus[0].speed, cpus.length)
+                //model: cpus[0].model,
+                cpuThreads: cpus.length,
+                cpuSpeed: cpus[0].speed, // + 'MHz',
+                //heoricScore: this.getTheoricScore(cpus[0].speed, cpus.length)
             },
             
-            totalRam: (os.totalmem() / 1024 / 1024 / 1024).toFixed(2) + ' GB',
+            ram: (os.totalmem()), /// 1024 / 1024 / 1024),//.toFixed(2) + ' GB',
 
             disks: diskInfo,
             
-            initDate: new Date().toISOString()
+            //initDate: new Date().toISOString()
         };
     }
 
@@ -70,12 +71,12 @@ class SystemMonitor {
         const totalMem = os.totalmem();
         const freeMem = os.freemem();
         const usedMem = totalMem - freeMem;
-        
-        return {
-            used: (usedMem / 1024 / 1024 / 1024).toFixed(2),
-            free: (freeMem / 1024 / 1024 / 1024).toFixed(2),
-            percentage: ((usedMem / totalMem) * 100).toFixed(2)
-        };
+        return freeMem;
+        // return {
+        //     used: (usedMem / 1024 / 1024 / 1024).toFixed(2),
+        //     free: (freeMem / 1024 / 1024 / 1024).toFixed(2),
+        //     percentage: ((usedMem / totalMem) * 100).toFixed(2)
+        // };
     }
 
     getActualCPU() {
@@ -91,19 +92,14 @@ class SystemMonitor {
             timestamp: now
         };
         
-        if (diffTick === 0) {
-            return {
-                percentage: '0.00',
-                timePassed:timePassed
-            };
-        }
+        if (diffTick === 0) return 0;
         
-        const usage = ((diffTick - diffIdle) / diffTick) * 100;
-        
-        return {
-            use: usage.toFixed(2),
-            timePassed:timePassed
-        };
+        const usage = ((diffTick - diffIdle) / diffTick);// * 100;
+        return usage;
+        // return {
+        //     use: usage.toFixed(2),
+        //     timePassed:timePassed
+        // };
     }
 
     async getInfo() {
@@ -111,20 +107,16 @@ class SystemMonitor {
         const cpu = this.getActualCPU();
         
         const metrics = {
-            datetime: new Date().toISOString(),
+            //datetime: new Date().toISOString(),
             
             // Mediciones actuales
-            cpu: cpu,
-            ram: ram,
+            availCpu: (1-cpu),
+            availRam: ram,
             
             // Carga adicional
-            systemLoad: os.loadavg(),
-            uptime: os.uptime()
+            //systemLoad: os.loadavg(),
+            //uptime: os.uptime()
         };
-        if(this.init){
-            metrics.specs = await this.getSpecs();
-            this.init=false;
-        }
         
         return metrics;
     }
