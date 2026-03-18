@@ -30,12 +30,26 @@ class SystemMonitor {
         const cpus = os.cpus();
 
         const disks = await si.diskLayout();
+
+        const volumes = await si.fsSize();
+        const largestFreeByDisk = {};
+
+        volumes.forEach(vol => {
+            const diskDev = disks.find(d => vol.fs.startsWith(d.device));
+            if (!diskDev) return;
+
+            const dev = diskDev.device;
+            if (!largestFreeByDisk[dev] || vol.available > largestFreeByDisk[dev]) {
+                largestFreeByDisk[dev] = vol.available;
+            }
+        });
         
         const diskInfo = await disks.reduce((acc, disk) => {
             acc[disk.device] = {
                 diskType: disk.type,
                 diskSize: (disk.size), /// 1024 / 1024 / 1024),//.toFixed(2) + ' GB',
-                diskSpeed: disk.bytesPerSector// + ' RPM'
+                diskSpeed: disk.bytesPerSector,// + ' RPM'
+                diskFreeSize: largestFreeByDisk[disk.device]
             };
             return acc;
         }, {});
