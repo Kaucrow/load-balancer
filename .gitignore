@@ -1,4 +1,4 @@
-/target
+/load-balancer/target
 
 settings/*.toml
 !settings/*.example.toml
