@@ -25,26 +25,12 @@ class SystemMonitor {
         const cpus = os.cpus();
 
         const disks = await si.diskLayout();
-
-        const volumes = await si.fsSize();
-        const largestFreeByDisk = {};
-
-        volumes.forEach(vol => {
-            const diskDev = disks.find(d => vol.fs.startsWith(d.device));
-            if (!diskDev) return;
-
-            const dev = diskDev.device;
-            if (!largestFreeByDisk[dev] || vol.available > largestFreeByDisk[dev]) {
-                largestFreeByDisk[dev] = vol.available;
-            }
-        });
         
         const diskInfo = await disks.reduce((acc, disk) => {
             acc[disk.device] = {
                 diskType: disk.type,
                 diskSize: (disk.size), /// 1024 / 1024 / 1024),//.toFixed(2) + ' GB',
-                diskSpeed: disk.bytesPerSector,// + ' RPM'
-                diskFreeSize: largestFreeByDisk[disk.device]
+                diskSpeed: disk.bytesPerSector// + ' RPM'
             };
             return acc;
         }, {});
@@ -74,13 +60,27 @@ class SystemMonitor {
         return usage;
     }
 
+    async getLargestFreeSize() {
+        const volumes = await si.fsSize();
+        let maxFree = 0;
+        
+        volumes.forEach(vol => {
+            if (vol.available > maxFree) {
+                maxFree = vol.available;
+            }
+        });
+        
+        return maxFree;
+    }
+
     async getInfo() {
         const ram = os.freemem();
         const cpu = this.getActualCPU();
         
         const metrics = {
             availCpu: (1-cpu),
-            availRam: ram,
+            availRam: os.freemem(),
+            diskFreeSize: await this.getLargestFreeSize(),
         };
         
         return metrics;
