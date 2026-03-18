@@ -37,7 +37,7 @@ client.on("connect", () => {
 
 client.on("message", (topic, payload) => {
   const data = JSON.parse(payload.toString());
-  console.log(`[consumer] Recibido mensaje de el topic ${topic}: ${data}`);
+  console.log(`[consumer] Recibido mensaje de el topic ${topic}: ${data.temp}`);
 });
 
 client.on("error", (err) => console.error("[consumer] Error MQTT:", err));
