@@ -1,0 +1,7 @@
+{
+  "name": "rpc-calculator-server",
+  "private": true,
+  "scripts": {
+    "start": "node Dispatcher.js"
+  }
+}

@@ -1,0 +1,7 @@
+@port: 50052
+@class: Calculator
+@method: add(params)
+@method: subtract(params)
+@method: multiply(params)
+@method: divide(params)
+@params = [x, y]

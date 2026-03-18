@@ -1,0 +1,8 @@
+{
+  "name": "rpc-calculator-client",
+  "private": true,
+  "scripts": {
+    "start": "node cli.js"
+  },
+  "type": "module"
+}
