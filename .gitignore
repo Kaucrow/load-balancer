@@ -1,5 +1,6 @@
 **/target
-
 **/settings/*.toml
 **/!settings/*.example.toml
 load_balancer/log/*
+
+/gateway/node_modules
