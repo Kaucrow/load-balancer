@@ -1,6 +1,7 @@
 import express from 'express';
 import Monitor from './monitor.js';
-import msgPackClient from './microservices-clients/msgpack.js';
+import msgPackClient from './microservices-clients/msgpack/msgpack.js';
+import calculatorProxy from './microservices-clients/rsi/CalculatorProxy.js';
 
 const app = express();
 app.use(express.json());
@@ -31,6 +32,15 @@ app.post('/msgpack', async (req, res) => {
     res.json(response);
   } catch(err) {
     res.status(500).json({ error: 'no se pudo procesar msgpack', details: err.message });
+  }
+});
+
+app.post('/rsi', async (req, res) => {
+  try{
+    const response = await Reflect.apply(calculatorProxy[req.body["action"]], calculatorProxy, req.body.params);
+    res.json(response);
+  } catch(err) {
+    res.status(500).json({ error: 'no se pudo procesar rsi', details: err.message });
   }
 });
 
