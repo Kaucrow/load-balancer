@@ -1,7 +1,9 @@
 import express from 'express';
 import Monitor from './monitor.js';
+import msgPackClient from './microservices-clients/msgpack.js';
 
 const app = express();
+app.use(express.json());
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = process.env.PORT || 3000;
 
@@ -20,6 +22,15 @@ app.get('/specs', async (req, res) => {
     res.json(specs);
   } catch (err) {
     res.status(500).json({ error: 'no se pudo obtener specs', details: err.message });
+  }
+});
+
+app.post('/msgpack', async (req, res) => {
+  try{
+    const response = await Reflect.apply(msgPackClient[req.body["action"]], msgPackClient, req.body.params);
+    res.json(response);
+  } catch(err) {
+    res.status(500).json({ error: 'no se pudo procesar msgpack', details: err.message });
   }
 });
 
