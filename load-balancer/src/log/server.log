@@ -1,7 +1,0 @@
-11-3-2026 20:51:31.587457119  INFO Querying gateway-1 at http://127.0.0.1:8081 for specs...
-11-3-2026 20:51:31.587950854 DEBUG connecting to 127.0.0.1:8081
-11-3-2026 20:51:31.588291247  WARN Failed to connect to gateway gateway-1 at http://127.0.0.1:8081
-11-3-2026 20:51:31.588353738  INFO Querying gateway-2 at http://127.0.0.1:8082 for specs...
-11-3-2026 20:51:31.588574449 DEBUG connecting to 127.0.0.1:8082
-11-3-2026 20:51:31.588770110  WARN Failed to connect to gateway gateway-2 at http://127.0.0.1:8082
-11-3-2026 20:51:31.588839808 ERROR CRITICAL: No gateways responded. Exiting.
