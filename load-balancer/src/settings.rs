@@ -26,6 +26,8 @@ impl ServerSettings {
 pub struct BalancerSettings {
     pub ram_weight: f64,
     pub cpu_weight: f64,
+    pub disk_weight: f64,
+    pub reference_max_compute: u64
 }
 
 #[derive(Deserialize, Debug)]

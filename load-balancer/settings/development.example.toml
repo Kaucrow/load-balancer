@@ -6,8 +6,10 @@ port = 8080
 protocol = "http"
 
 [balancer]
-ram-weight = 2.0
-cpu-weight = 1.0
+ram-weight = 3.0
+cpu-weight = 2.0
+disk-weight = 1.0
+reference-max-compute = 50000
 
 [[gateways]]
 name = "gateway-1"

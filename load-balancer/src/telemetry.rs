@@ -31,13 +31,16 @@ impl FormatTime for TimeFormat {
 
 /// Build a tracing subscriber.
 pub async fn get_subscriber(settings: &Settings) -> Result<(impl tracing::Subscriber + Send + Sync, tracing_appender::non_blocking::WorkerGuard)> {
-    let path = PathBuf::from("./log/server.log");
+    let exe_path = std::env::current_exe()?;
+    let exe_dir = exe_path.parent().ok_or_else(|| anyhow::anyhow!("Failed to get exe directory"))?;
+    let log_dir = exe_dir.join("log");
+    let log_path = log_dir.join("server.log");
 
-    if path.exists() && path.is_file() {
-        fs::remove_file(&path)?
+    if log_path.exists() && log_path.is_file() {
+        fs::remove_file(&log_path)?
     }
 
-    let file_appender = tracing_appender::rolling::never("log", "server.log");
+    let file_appender = tracing_appender::rolling::never(log_dir, "server.log");
     let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
 
     let (console_filter, file_filter) = if settings.debug {

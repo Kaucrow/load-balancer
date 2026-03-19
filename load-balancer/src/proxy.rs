@@ -49,10 +49,10 @@ pub async fn proxy_handler(
             }
 
             // Extract the new metrics from the HTTP headers returned by the gateway.
-            // Example: "X-Avail-Ram: 3.72"
+            // Example: "X-Avail-Ram: 443721695190"
             if let Some(ram_header) = res.headers().get("X-Avail-Ram") {
                 if let Ok(ram_str) = ram_header.to_str() {
-                    if let Ok(new_ram) = ram_str.parse::<f64>() {
+                    if let Ok(new_ram) = ram_str.parse::<u64>() {
                         let mut node_ram = chosen_gateway.avail_ram.write().unwrap();
                         *node_ram = new_ram;
                     }
@@ -65,6 +65,16 @@ pub async fn proxy_handler(
                     if let Ok(new_cpu) = cpu_str.parse::<f64>() {
                         let mut node_cpu = chosen_gateway.avail_cpu.write().unwrap();
                         *node_cpu = new_cpu;
+                    }
+                }
+            }
+
+            // Example: "X-Disk-Free-Size: 9573219641"
+            if let Some(free_disk_header) = res.headers().get("X-Disk-Free-Size") {
+                if let Ok(free_disk_str) = free_disk_header.to_str() {
+                    if let Ok(new_free_disk) = free_disk_str.parse::<u64>() {
+                        let mut node_free_disk = chosen_gateway.disk_free_size.write().unwrap();
+                        *node_free_disk = new_free_disk;
                     }
                 }
             }
