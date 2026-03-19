@@ -42,7 +42,7 @@ class SystemMonitor {
             },
             
             ram: os.totalmem(),
-            disks: diskInfo,
+            disk: diskInfo,
         };
     }
 
