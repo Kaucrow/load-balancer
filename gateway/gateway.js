@@ -3,6 +3,7 @@ import Monitor from './monitor.js';
 import msgPackClient from './microservices-clients/msgpack/msgpack.js';
 import calculatorProxy from './microservices-clients/rsi/CalculatorProxy.js';
 import calculateDeterminant from './microservices-clients/grpc/src/grpc-client.js';
+import mqttClient from './microservices-clients/mqtt/mqtt.js';
 
 const app = express();
 app.use(express.json());
@@ -51,6 +52,16 @@ app.post('/grpc', async (req, res) => {
     res.json(response);
   } catch(err) {
     res.status(500).json({ error: 'no se pudo procesar grpc', details: err.message });
+  }
+});
+
+app.post('/mqtt', async (req, res) => {
+  try{
+    await mqttClient.publish(req.body.option);
+    const response = await mqttClient.waitForResponse(3000);
+    res.json(response);
+  } catch(err) {
+    res.status(500).json({ error: 'no se pudo procesar mqtt', details: err.message });
   }
 });
 
