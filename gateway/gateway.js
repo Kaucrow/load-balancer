@@ -10,6 +10,20 @@ app.use(express.json());
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = process.env.PORT || 3000;
 
+app.use(async (req, res, next) => {
+  try {
+    const info = await Monitor.getInfo();
+    res.set({
+      'X-Avail-Ram': info.availRam,
+      'X-Avail-CPU': info.availCpu,
+      'X-Disk-Free-Size': info.diskFreeSize
+    });
+  } catch (error) {
+    console.error('Error en middleware de headers:', error);
+  }
+  next(); // Siempre continuar aunque fallen los headers
+});
+
 app.get('/info', async (req, res) => {
   try {
     const info = await Monitor.getInfo();
@@ -68,7 +82,6 @@ app.post('/mqtt', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`gateway escuchando en http://${HOST}:${PORT}`);
 });
-
 
 process.on('SIGINT', async () => {
     console.log('\n\n🛑 Deteniendo...');
