@@ -2,6 +2,7 @@ import express from 'express';
 import Monitor from './monitor.js';
 import msgPackClient from './microservices-clients/msgpack/msgpack.js';
 import calculatorProxy from './microservices-clients/rsi/CalculatorProxy.js';
+import calculateDeterminant from './microservices-clients/grpc/src/grpc-client.js';
 
 const app = express();
 app.use(express.json());
@@ -41,6 +42,15 @@ app.post('/rsi', async (req, res) => {
     res.json(response);
   } catch(err) {
     res.status(500).json({ error: 'no se pudo procesar rsi', details: err.message });
+  }
+});
+
+app.post('/grpc', async (req, res) => {
+  try{
+    const response = await calculateDeterminant(req.body);
+    res.json(response);
+  } catch(err) {
+    res.status(500).json({ error: 'no se pudo procesar grpc', details: err.message });
   }
 });
 
