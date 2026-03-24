@@ -10,6 +10,10 @@ const topics = {
 
 const client = mqtt.connect(mqttURL);
 
+
+// 10.141.20.122
+
+
 client.on("connect", () => {
   console.log("[consumer] Conectado al broker");
   client.subscribe(topics.response);

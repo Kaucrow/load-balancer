@@ -2,7 +2,7 @@ use crate::{
     prelude::*,
     settings::{GatewayConfig, get_settings}
 };
-use super::types::*;
+use super::types::{DiskType, GatewayInfo, GatewaySpecs};
 
 #[derive(Debug)]
 pub struct GatewayNode {
@@ -19,22 +19,29 @@ pub async fn initialize_gateways(gateways: Vec<GatewayConfig>, client: &Client) 
 
     for gateway in gateways {
         info!("Querying {} at {} for specs...", gateway.name, gateway.url());
-        let endpoint = format!("{}/system-specs", gateway.url());
+        let specs_endpoint = format!("{}/specs", gateway.url());
+        let info_endpoint = format!("{}/info", gateway.url());
 
-        match client.get(&endpoint).send().await {
-            Ok(res) if res.status().is_success() => {
-                if let Ok(specs) = res.json::<GatewaySpecs>().await {
-                    nodes.push(GatewayNode {
-                        name: gateway.name.clone(),
-                        url: gateway.url().to_string(),
-                        avail_ram: RwLock::new(specs.ram),
-                        avail_cpu: RwLock::new(100.0),
-                        disk_free_size: RwLock::new(specs.disk.get(specs.disk.keys().next().unwrap()).unwrap().disk_size),
-                        specs,
-                    });
-                    info!("Registered gateway {} at {}", gateway.name, gateway.url());
-                } else {
-                    error!("Failed to parse specs from {} at {}", gateway.name, gateway.url());
+        let specs_res = client.get(&specs_endpoint).send().await;
+        let info_res = client.get(&info_endpoint).send().await;
+
+        match (specs_res, info_res) {
+            (Ok(s), Ok(i)) if s.status().is_success() && i.status().is_success() => {
+                let specs = s.json::<GatewaySpecs>().await;
+                let info = i.json::<GatewayInfo>().await;
+                match (specs, info) {
+                    (Ok(specs), Ok(info)) => {
+                        nodes.push(GatewayNode {
+                            name: gateway.name.clone(),
+                            url: gateway.url().to_string(),
+                            avail_ram: RwLock::new(info.avail_ram),
+                            avail_cpu: RwLock::new(info.avail_cpu),
+                            disk_free_size: RwLock::new(info.disk_free_size),
+                            specs,
+                        });
+                        info!("Registered gateway {} at {}", gateway.name, gateway.url());
+                    }
+                    _ => error!("Failed to parse specs/info from {} at {}", gateway.name, gateway.url()),
                 }
             }
             _ => warn!("Failed to connect to gateway {} at {}", gateway.name, gateway.url()),
@@ -63,7 +70,7 @@ pub fn select_best_gateway(gateways: &[GatewayNode]) -> anyhow::Result<&GatewayN
 
         // CPU Calculation
         let total_compute = node.specs.cpu.cpu_threads as f64 * node.specs.cpu.cpu_speed as f64;
-        let avail_compute = total_compute * (current_cpu_percent_avail / 100.0);
+        let avail_compute = total_compute * current_cpu_percent_avail;
 
         let cpu_score = (avail_compute / settings.balancer.reference_max_compute as f64) * 100.0;
 

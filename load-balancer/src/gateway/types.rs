@@ -28,3 +28,11 @@ pub struct GatewaySpecs {
     pub ram: u64,
     pub disk: HashMap<String, DiskSpecs>,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GatewayInfo {
+    pub avail_cpu: f64,
+    pub avail_ram: u64,
+    pub disk_free_size: u64,
+}

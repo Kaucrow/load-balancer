@@ -71,8 +71,7 @@ app.post('/grpc', async (req, res) => {
 
 app.post('/mqtt', async (req, res) => {
   try{
-    await mqttClient.publish(req.body.option);
-    const response = await mqttClient.waitForResponse(3000);
+    const response = await mqttClient.request(req.body.option, 3000);
     res.json(response);
   } catch(err) {
     res.status(500).json({ error: 'no se pudo procesar mqtt', details: err.message });

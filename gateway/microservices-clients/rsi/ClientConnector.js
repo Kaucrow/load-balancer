@@ -7,6 +7,8 @@ class ClientConnector {
         this.port = 50052;
         this.connected = false;
         this.connecting = null;
+        this._queue = [];
+        this._running = false;
         this.connect();
     }
 
@@ -69,6 +71,27 @@ class ClientConnector {
     }
 
     async send(request) {
+        return new Promise((resolve, reject) => {
+            this._queue.push({ fn: () => this._sendInternal(request), resolve, reject });
+            this._drain();
+        });
+    }
+
+    async _drain() {
+        if (this._running || this._queue.length === 0) return;
+        this._running = true;
+        const { fn, resolve, reject } = this._queue.shift();
+        try {
+            resolve(await fn());
+        } catch (e) {
+            reject(e);
+        } finally {
+            this._running = false;
+            this._drain();
+        }
+    }
+
+    async _sendInternal(request) {
         if (this.connecting) {
             await this.connecting;
         }

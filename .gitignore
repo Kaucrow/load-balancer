@@ -4,3 +4,4 @@
 load_balancer/log/*
 
 /gateway/node_modules
+PLAN.md

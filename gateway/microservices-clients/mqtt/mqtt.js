@@ -5,8 +5,7 @@ const BROKER_URL = "mqtt://localhost:1883";
 class MQTTClient {
     constructor() {
         this.client = mqtt.connect(BROKER_URL);
-        this.lastValue = null;
-        this.getResponse = true;
+        this._pendingQueue = [];
 
         this.topics = {
             request: "sensor/climate/request",
@@ -19,11 +18,10 @@ class MQTTClient {
         });
 
         this.client.on("message", (topic, payload) => {
-            if (this.getResponse){
-                this.lastValue = JSON.parse(payload.toString());
-                this.getResponse = false;
-            }
-            //console.log(`[consumer] Recibido mensaje de el topic ${topic}: ${data.temp}`);
+            if (this._pendingQueue.length === 0) return;
+            const { resolve, timeoutId } = this._pendingQueue.shift();
+            clearTimeout(timeoutId);
+            resolve(JSON.parse(payload.toString()));
         });
 
         this.client.on("error", (err) => {
@@ -31,31 +29,15 @@ class MQTTClient {
         });
     }
 
-    publish(msg){
-        this.getResponse = true;
-        this.client.publish(this.topics.request, msg);
-        return this.lastValue;
-    }
-
-    async waitForResponse(timeout = 5000) {
+    async request(option, timeout = 5000) {
         return new Promise((resolve, reject) => {
-            if (!this.getResponse && this.lastValue !== null) {
-                resolve(this.lastValue);
-                return;
-            }
-
             const timeoutId = setTimeout(() => {
-                clearInterval(intervalId);
+                const idx = this._pendingQueue.findIndex(p => p.timeoutId === timeoutId);
+                if (idx !== -1) this._pendingQueue.splice(idx, 1);
                 reject(new Error(`Timeout después de ${timeout}ms`));
             }, timeout);
-
-            const intervalId = setInterval(() => {
-                if (!this.getResponse && this.lastValue !== null) {
-                    clearInterval(intervalId);
-                    clearTimeout(timeoutId);
-                    resolve(this.lastValue);
-                }
-            }, 100);
+            this._pendingQueue.push({ resolve, reject, timeoutId });
+            this.client.publish(this.topics.request, option);
         });
     }
 }
