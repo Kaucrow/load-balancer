@@ -11,6 +11,11 @@ const HOST = process.env.HOST || '0.0.0.0';
 const PORT = process.env.PORT || 3000;
 
 app.use(async (req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    console.log(`[${PORT}] ${req.method} ${req.path} → ${res.statusCode} (${ms}ms)`);
+  });
   try {
     const info = await Monitor.getInfo();
     res.set({
@@ -62,7 +67,8 @@ app.post('/rsi', async (req, res) => {
 
 app.post('/grpc', async (req, res) => {
   try{
-    const response = await calculateDeterminant(req.body);
+    const rows = req.body.rows ?? 3;
+    const response = await calculateDeterminant({ rows, cols: rows });
     res.json(response);
   } catch(err) {
     res.status(500).json({ error: 'no se pudo procesar grpc', details: err.message });

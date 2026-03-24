@@ -4,6 +4,7 @@ import si from 'systeminformation';
 class SystemMonitor {
     constructor() {
         this.lastMeditionCPU = this.getTimesCPU();
+        this._cachedInfo = { availCpu: 1.0, availRam: os.freemem(), diskFreeSize: 0 };
     }
 
     getTimesCPU() {
@@ -74,19 +75,23 @@ class SystemMonitor {
     }
 
     async getInfo() {
-        const ram = os.freemem();
+        return this._cachedInfo;
+    }
+
+    async _refreshCache() {
         const cpu = this.getActualCPU();
-        
-        const metrics = {
-            availCpu: (1-cpu),
+        this._cachedInfo = {
+            availCpu: (1 - cpu),
             availRam: os.freemem(),
             diskFreeSize: await this.getLargestFreeSize(),
         };
-        
-        return metrics;
     }
-
 }
 
 const Monitor = new SystemMonitor();
+
+// Inicializar cache y refrescar cada 2 segundos en background
+await Monitor._refreshCache();
+setInterval(() => Monitor._refreshCache(), 2000);
+
 export default Monitor;

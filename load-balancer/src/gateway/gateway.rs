@@ -12,6 +12,7 @@ pub struct GatewayNode {
     pub avail_ram: RwLock<u64>,
     pub avail_cpu: RwLock<f64>,
     pub disk_free_size: RwLock<u64>,
+    pub active_requests: AtomicU64,
 }
 
 pub async fn initialize_gateways(gateways: Vec<GatewayConfig>, client: &Client) -> Vec<GatewayNode> {
@@ -37,6 +38,7 @@ pub async fn initialize_gateways(gateways: Vec<GatewayConfig>, client: &Client) 
                             avail_ram: RwLock::new(info.avail_ram),
                             avail_cpu: RwLock::new(info.avail_cpu),
                             disk_free_size: RwLock::new(info.disk_free_size),
+                            active_requests: AtomicU64::new(0),
                             specs,
                         });
                         info!("Registered gateway {} at {}", gateway.name, gateway.url());
@@ -104,7 +106,8 @@ pub fn select_best_gateway(gateways: &[GatewayNode]) -> anyhow::Result<&GatewayN
         // Apply the multiplier directly to the weighted disk score
         let disk_score = (disk_percent_avail * disk_weight) * disk_multiplier;
 
-        let score = cpu_score + ram_score + disk_score;
+        let active = node.active_requests.load(Ordering::Relaxed) as f64;
+        let score = (cpu_score + ram_score + disk_score) / (active + 1.0);
 
         // Find the winner
         if score > highest_score {

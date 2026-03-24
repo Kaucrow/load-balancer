@@ -26,6 +26,7 @@ pub async fn proxy_handler(
     let target_url = format!("{}{}", chosen_gateway.url, path_and_query);
 
     // Build and send the forwarded request
+    chosen_gateway.active_requests.fetch_add(1, Ordering::Relaxed);
     let mut req_builder = state.client.request(method, &target_url);
     for (key, value) in headers.iter() {
         if key != axum::http::header::HOST {
@@ -34,6 +35,7 @@ pub async fn proxy_handler(
     }
 
     let backend_response = req_builder.body(body).send().await;
+    chosen_gateway.active_requests.fetch_sub(1, Ordering::Relaxed);
 
     // Handle the response and extract the new metrics
     match backend_response {

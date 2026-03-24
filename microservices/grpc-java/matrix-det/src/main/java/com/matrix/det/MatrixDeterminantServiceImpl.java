@@ -31,16 +31,12 @@ public class MatrixDeterminantServiceImpl extends MatrixDeterminantServiceGrpc.M
             return;
         }
 
+        long start = System.currentTimeMillis();
         double[][] matrix = generateRandomMatrix(rows);
         double determinant = calculateDet(matrix, rows);
+        long ms = System.currentTimeMillis() - start;
 
-        if (rows <= 20) {
-            System.out.println("Matriz " + rows + "x" + cols + " generada:");
-            printMatrix(matrix, rows);
-        } else {
-            System.out.println("Matriz " + rows + "x" + cols + " generada (no se imprime, supera 20x20)");
-        }
-        System.out.println("Determinante: " + determinant);
+        System.out.printf("[grpc-java] calculateDeterminant(%dx%d) → %.4f (%dms)%n", rows, cols, determinant, ms);
 
         DeterminantResponse response = DeterminantResponse.newBuilder()
                 .setDeterminant(determinant)

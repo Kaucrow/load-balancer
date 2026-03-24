@@ -38,23 +38,25 @@ client.on("connect", () => {
     temperature = parseFloat(drift(temperature, 0.5, -10, 45).toFixed(1));
     humidity = parseFloat(drift(humidity, 1, 10, 95).toFixed(1));
 
-    console.log(`[sensor] temp=${temperature}°C  hum=${humidity}%`);
+    // console.log(`[sensor] temp=${temperature}°C  hum=${humidity}%`);
 
   }, msInterval);
 });
 
 client.on("message", (topic, payload) => {
   const msg = payload.toString();
+  const wantsTemp = msg === "temperature" || msg === "temp" || msg === "all";
+  const wantsHum  = msg === "humidity"    || msg === "hum"  || msg === "all";
 
-  if (msg === "temperature" || msg === "humidity" || msg === "all") {
+  if (wantsTemp || wantsHum) {
     const response: ClimateResponse = { type: msg, timestamp: new Date().toISOString() };
 
-    if (msg === "temperature" || msg === "all") response.temperature = temperature;
-    if (msg === "humidity" || msg === "all") response.humidity = humidity;
+    if (wantsTemp) response.temperature = temperature;
+    if (wantsHum)  response.humidity = humidity;
 
     client.publish(topics.response, JSON.stringify(response));
 
-    console.log(`[sensor] Respondiendo a solicitud de "${msg}" en ${topic}`);
+    console.log(`[mqtt-sensor] solicitud "${msg}" → temp=${response.temperature ?? '-'}°C hum=${response.humidity ?? '-'}% (${new Date().toISOString()})`);
   }
 });
 

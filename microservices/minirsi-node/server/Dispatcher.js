@@ -61,12 +61,15 @@ class Dispatcher {
     async handleRpc(socket, messageJson) {
         try {
             const payload = this.deserialize(messageJson);
-            console.log(`Ejecutando: ${payload.class}.${payload.method}(${(payload.params || []).join(', ')})`);
+            const start = Date.now();
+            const call = `${payload.class}.${payload.method}(${(payload.params || []).join(', ')})`;
 
             const result = await this.executeMethod(payload);
+            const ms = Date.now() - start;
+            console.log(`[minirsi] ${call} → ${result} (${ms}ms)`);
             this.sendResponse(socket, { status: 'ok', response: result });
         } catch (error) {
-            console.error("Error:", error.message);
+            console.error(`[minirsi] Error: ${error.message}`);
             this.sendResponse(socket, { status: 'error', msg: error.message });
         }
     }

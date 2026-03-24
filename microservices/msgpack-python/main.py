@@ -1,4 +1,4 @@
-import psycopg2
+import psycopg2.pool
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,9 +10,9 @@ from app.db import session
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    session.connection = psycopg2.connect(dsn=databaseURL)
+    session.pool = psycopg2.pool.ThreadedConnectionPool(minconn=2, maxconn=20, dsn=databaseURL)
     yield
-    session.connection.close()
+    session.pool.closeall()
 
 
 app = FastAPI(title="Football Teams API", version="1.0.0", lifespan=lifespan)
