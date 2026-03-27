@@ -3,12 +3,7 @@ import si from 'systeminformation';
 
 class SystemMonitor {
     constructor() {
-        this.lastMeditionCPU = {
-            times: this.getTimesCPU(),
-            timestamp: Date.now()
-        };
-        
-        this.init=true;
+        this.lastMeditionCPU = this.getTimesCPU();
     }
 
     getTimesCPU() {
@@ -41,81 +36,51 @@ class SystemMonitor {
         }, {});
         
         return {
-            //hostname: os.hostname(),
-            //platform: os.platform(),
-            //arch: process.arch,
-            
             cpu: {
-                //model: cpus[0].model,
                 cpuThreads: cpus.length,
                 cpuSpeed: cpus[0].speed, // + 'MHz',
-                //heoricScore: this.getTheoricScore(cpus[0].speed, cpus.length)
             },
             
-            ram: (os.totalmem()), /// 1024 / 1024 / 1024),//.toFixed(2) + ' GB',
-
-            disks: diskInfo,
-            
-            //initDate: new Date().toISOString()
+            ram: os.totalmem(),
+            disk: diskInfo,
         };
-    }
-
-    getTheoricScore(speed, cores) {
-        const archFactor = process.arch.includes('64') ? 1.2 : 1.0;
-        return (speed * cores * archFactor).toFixed(0);
-    }
-
-
-
-    getActualRAM() {
-        const totalMem = os.totalmem();
-        const freeMem = os.freemem();
-        const usedMem = totalMem - freeMem;
-        return freeMem;
-        // return {
-        //     used: (usedMem / 1024 / 1024 / 1024).toFixed(2),
-        //     free: (freeMem / 1024 / 1024 / 1024).toFixed(2),
-        //     percentage: ((usedMem / totalMem) * 100).toFixed(2)
-        // };
     }
 
     getActualCPU() {
-        const now = Date.now();
         const actualTimes= this.getTimesCPU();
+
+        const diffTick = actualTimes.totalTick - this.lastMeditionCPU.totalTick;
+        const diffIdle = actualTimes.totalIdle - this.lastMeditionCPU.totalIdle;
         
-        const timePassed = now - this.lastMeditionCPU.timestamp;
-        const diffTick = actualTimes.totalTick - this.lastMeditionCPU.times.totalTick;
-        const diffIdle = actualTimes.totalIdle - this.lastMeditionCPU.times.totalIdle;
-        
-        this.lastMeditionCPU = {
-            times: actualTimes,
-            timestamp: now
-        };
+        this.lastMeditionCPU = actualTimes;
         
         if (diffTick === 0) return 0;
         
         const usage = ((diffTick - diffIdle) / diffTick);// * 100;
         return usage;
-        // return {
-        //     use: usage.toFixed(2),
-        //     timePassed:timePassed
-        // };
+    }
+
+    async getLargestFreeSize() {
+        const volumes = await si.fsSize();
+        let maxFree = 0;
+        
+        volumes.forEach(vol => {
+            if (vol.available > maxFree) {
+                maxFree = vol.available;
+            }
+        });
+        
+        return maxFree;
     }
 
     async getInfo() {
-        const ram = this.getActualRAM();
+        const ram = os.freemem();
         const cpu = this.getActualCPU();
         
         const metrics = {
-            //datetime: new Date().toISOString(),
-            
-            // Mediciones actuales
             availCpu: (1-cpu),
-            availRam: ram,
-            
-            // Carga adicional
-            //systemLoad: os.loadavg(),
-            //uptime: os.uptime()
+            availRam: os.freemem(),
+            diskFreeSize: await this.getLargestFreeSize(),
         };
         
         return metrics;
