@@ -32,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
     // Set up the Axum router
     let app = Router::new()
         .route("/", any(proxy_handler))
-        .route("/*path", any(proxy_handler))
+        .route("/{*path}", any(proxy_handler))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(

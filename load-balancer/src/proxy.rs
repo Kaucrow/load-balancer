@@ -55,6 +55,7 @@ pub async fn proxy_handler(
                     if let Ok(new_ram) = ram_str.parse::<u64>() {
                         let mut node_ram = chosen_gateway.avail_ram.write().unwrap();
                         *node_ram = new_ram;
+                        info!("Got ram: {}", new_ram);
                     }
                 }
             }
@@ -65,6 +66,7 @@ pub async fn proxy_handler(
                     if let Ok(new_cpu) = cpu_str.parse::<f64>() {
                         let mut node_cpu = chosen_gateway.avail_cpu.write().unwrap();
                         *node_cpu = new_cpu;
+                        info!("Got cpu: {}", new_cpu);
                     }
                 }
             }
@@ -75,6 +77,7 @@ pub async fn proxy_handler(
                     if let Ok(new_free_disk) = free_disk_str.parse::<u64>() {
                         let mut node_free_disk = chosen_gateway.disk_free_size.write().unwrap();
                         *node_free_disk = new_free_disk;
+                        info!("Got free disk: {}", new_free_disk);
                     }
                 }
             }

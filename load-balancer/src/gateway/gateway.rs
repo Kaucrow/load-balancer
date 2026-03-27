@@ -19,7 +19,7 @@ pub async fn initialize_gateways(gateways: Vec<GatewayConfig>, client: &Client) 
 
     for gateway in gateways {
         info!("Querying {} at {} for specs...", gateway.name, gateway.url());
-        let endpoint = format!("{}/system-specs", gateway.url());
+        let endpoint = format!("{}/specs", gateway.url());
 
         match client.get(&endpoint).send().await {
             Ok(res) if res.status().is_success() => {
@@ -99,6 +99,8 @@ pub fn select_best_gateway(gateways: &[GatewayNode]) -> anyhow::Result<&GatewayN
 
         let score = cpu_score + ram_score + disk_score;
 
+        info!("Got score for gateway {}: {}", node.name, score);
+
         // Find the winner
         if score > highest_score {
             highest_score = score;
@@ -106,5 +108,6 @@ pub fn select_best_gateway(gateways: &[GatewayNode]) -> anyhow::Result<&GatewayN
         }
     }
 
+    info!("Sending to gateway {} at {}", best_node.name, best_node.url);
     Ok(best_node)
 }
